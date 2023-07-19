@@ -1,7 +1,26 @@
 from django.urls import path
-from .views import HomeView, PricingView
+from .views import HomeView, PricingView, RegisterView
 
 urlpatterns = [
+    # PAGINA DE INICIO
     path('', HomeView.as_view(), name='home'),
+
+    # PAGINA DE PRECIOS
     path('pricing/', PricingView.as_view(), name='pricing'),
+
+    # PAGINA DE PREGUNTAS Y RESPUESTAS / PAGINA DE ACERCA DE (A CARGO DE LOS SEGUIDORES DEL CANAL)
+
+    # PAGINAS DE LOGIN Y REGISTRO (VIDEO 5)
+    path('register/', RegisterView.as_view(), name='register'),
+
+    # PAGINAS DE PERFIL: VISTA DE PERFIL - EDICION DEL PERFIL (VIDEO 6)
+
+    # PAGINAS QUE ADMINISTRAN LOS CURSOS: LA LISTA DE CURSOS - (LA CREACION DE CURSOS - LA EDICION DE CURSOS - LA ELIMINACION DE CURSOS) (VIDEO 7)
+
+    # PAGINA DE VISTA DE INSCRIPCION (VIDEO 8)
+
+    # PAGINAS ADMINISTRACION DE NOTAS: (LISTA DE ESTUDIANTES POR CURSO - EDICION DE NOTAS) (VIDEO 9)
+
+    # PAGINAS DE ASISTENCIAS: (LISTA DE ESTUDIANTES POR CURSO - AGREGAR ASISTENCIAS) (VIDEO 10)
+
 ]
