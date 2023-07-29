@@ -46,7 +46,7 @@
         <div class="text-end">
             {% if user.is_authenticated %}
                 <li style="list-style-type: none;">
-                    <a class="nav-link px-2 text-white" href="http://">{{ group_name|capfirst }}
+                    <a class="nav-link px-2 text-white" href="{% url 'profile' %}">{{ group_name_singular|capfirst }}
                         | {{ user.username }}</a>
                 </li>
             {% else %}
