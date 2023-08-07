@@ -33,7 +33,7 @@
 
 
         <li><a href="{% url 'home' %}" class="nav-link px-2 text-white">Inicio</a></li>
-        <li><a href="#" class="nav-link px-2 text-white">Cursos</a></li>
+        <li><a href="{% url 'courses' %}" class="nav-link px-2 text-white">Cursos</a></li>
 
 
         {% if not user.is_authenticated or group_name == 'estudiantes' %}

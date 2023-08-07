@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HomeView, PricingView, RegisterView, ProfileView
+from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView
 
 urlpatterns = [
     # PAGINA DE INICIO
@@ -17,11 +17,12 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
 
     # PAGINAS QUE ADMINISTRAN LOS CURSOS: LA LISTA DE CURSOS - (LA CREACION DE CURSOS - LA EDICION DE CURSOS - LA ELIMINACION DE CURSOS) (VIDEO 10)
+    path('courses/', CoursesView.as_view(), name='courses'),
+    path('courses/create/', CourseCreateView.as_view(), name='course_create'),
 
     # PAGINA DE VISTA DE INSCRIPCION (VIDEO 11)
 
     # PAGINAS ADMINISTRACION DE NOTAS: (LISTA DE ESTUDIANTES POR CURSO - EDICION DE NOTAS) (VIDEO 12)
 
     # PAGINAS DE ASISTENCIAS: (LISTA DE ESTUDIANTES POR CURSO - AGREGAR ASISTENCIAS) (VIDEO 13)
-
 ]
