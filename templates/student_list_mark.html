@@ -1,10 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class="container mt-3">
+		<h2>Listado de Alumnos - <strong>{{ course }}</strong>
+			{% if course.status == 'I' %}
+				<span class="badge bg-success float-end">EN ETAPA DE INSCRIPCION</span>
+			{% elif course.status == 'P' %}
+				<span class="badge bg-warning text-dark float-end">EN PROGRESO</span>
+			{% elif course.status == 'F' %}
+				<span class="badge bg-danger float-end">FINALIZADO</span>
+			{% endif %}
+		</h2>
+
+
+		<table class="table">
+			<thead>
+			<tr>
+				<th scope="col">Alumno</th>
+				<th scope="col">Evaluación 1</th>
+				<th scope="col">Evaluación 2</th>
+				<th scope="col">Evaluación 3</th>
+				<th scope="col">Promedio</th>
+				<th scope="col">Acciones</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for data in student_data %}
+				<tr>
+					<th scope="row">{{ data.name }}</th>
+					<td>{{ data.mark_1 }}</td>
+					<td>{{ data.mark_2 }}</td>
+					<td>{{ data.mark_3 }}</td>
+					<td><strong>{{ data.average }}</strong></td>
+					<td>
+						<a class="btn btn-sm btn-primary {% if course.status == 'I' or course.status == 'F' %}disabled{% endif %}"
+						   href="{% url 'update_mark' data.mark_id %}">Agregar Nota</a>
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

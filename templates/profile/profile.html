@@ -30,21 +30,16 @@
                 </div>
             </div>
             <div class="col-md-8">
-                <!-- CARD VARIABLE -->
-                <div class="card border rounded-2 shadow p-3 mb-3">
-                    <div class="card-body">
-                        <!-- evaluar grupo al que pertenece el usuario -->
-                        {% if group_name == 'estudiantes' %}
-                            {% include 'profile/students.html' %}
-                        {% elif group_name == 'profesores' %}
-                            {% include 'profile/profesor.html' %}
-                        {% elif group_name == 'preceptores' %}
-                            {% include 'profile/preceptor.html' %}
-                        {% elif group_name == 'administrativos' %}
-                            {% include 'profile/admin.html' %}
-                        {% endif %}
-                    </div>
-                </div>
+                <!-- evaluar grupo al que pertenece el usuario -->
+                {% if group_name == 'estudiantes' %}
+                    {% include 'profile/students.html' %}
+                {% elif group_name == 'profesores' %}
+                    {% include 'profile/profesor.html' %}
+                {% elif group_name == 'preceptores' %}
+                    {% include 'profile/preceptor.html' %}
+                {% elif group_name == 'administrativos' %}
+                    {% include 'profile/admin.html' %}
+                {% endif %}
             </div>
         </div>
     </div>

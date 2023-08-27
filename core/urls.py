@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, ErrorView
+from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, ErrorView
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -22,11 +22,16 @@ urlpatterns = [
     path('courses/create/', login_required(CourseCreateView.as_view()), name='course_create'),
     path('courses/<int:pk>/edit/', login_required(CourseEditView.as_view()), name='course_edit'),
     path('courses/<int:pk>/delete/', login_required(CourseDeleteView.as_view()), name='course_delete'),
+
+    # INSCRIPCION DE UN ALUMNO EN UN CURSO
+    path('enroll_course/<int:course_id>', CourseEnrollmentView.as_view(), name='enroll_course'),
     path('error/', login_required(ErrorView.as_view()), name='error'),
 
-    # PAGINA DE VISTA DE INSCRIPCION (VIDEO 11)
+    # PAGINA DE VISTA DE INSCRIPCION
+    path('courses/<int:course_id>', StudentListMarkView.as_view(), name='student_list_mark'),
+    path('courses/update_mark/<int:mark_id>', UpdateMarkView.as_view(), name='update_mark'),
 
-    # PAGINAS ADMINISTRACION DE NOTAS: (LISTA DE ESTUDIANTES POR CURSO - EDICION DE NOTAS) (VIDEO 12)
+    # PAGINAS ADMINISTRACION DE NOTAS: (LISTA DE ESTUDIANTES POR CURSO - EDICION DE NOTAS)
 
-    # PAGINAS DE ASISTENCIAS: (LISTA DE ESTUDIANTES POR CURSO - AGREGAR ASISTENCIAS) (VIDEO 13)
+    # PAGINAS DE ASISTENCIAS: (LISTA DE ESTUDIANTES POR CURSO - AGREGAR ASISTENCIAS)
 ]
