@@ -1,10 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-3">
+    <h2 class="mb-4">Registrar Asistencias para el curso: {{ course.name }}</h2>
+    <h5>
+        Profesor: <strong>{{ course.teacher.get_full_name }}</strong>
+        {% if course.status == 'I' %}
+            <span class="badge bg-success float-end">EN ETAPA DE INSCRIPCION</span>
+        {% elif course.status == 'P' %}
+            <span class="badge bg-warning text-dark float-end">EN PROGRESO</span>
+        {% elif course.status == 'F' %}
+            <span class="badge bg-danger float-end">FINALIZADO</span>
+        {% endif %}
+    </h5>
+    <hr>
+    <form action="{% url 'add_attendance' course.id %}" method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-6 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        Registrar Asistencias
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="date">Fecha:</label>
+                            <input class="form-control" type="date" name="date" id="date">
+                        </div>
+                        <hr>
+                        {% for registration in registrations %}
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="attendance_{{ registration.student.id }}" id="{{ registration.student.id }}_present">
+                                    <label for="{{ registration.student.id }}_present">{{ registration.student.get_full_name }}</label>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="card-footer text-body-secondary">
+                        <button class="btn btn-sm btn-primary float-end" type="submit">Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+

@@ -1,21 +1,196 @@
 <h5>CURSOS EN LOS QUE ESTA INSCRIPTO</h5>
-{% if enrolled_courses %}
+<div class="accordion" id="accordionEvolution">
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="headingOne">
+			<button class="accordion-button collapsed bg-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+				CURSOS EN PROGRESO
+			</button>
+		</h2>
+		<div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionEvolution">
+			<div class="accordion-body">
+				{% if progress_courses %}
+					<ul class="list-group">
+						{% for course in progress_courses %}
+							<li class="list-group-item list-group-item-warning">
+								{{ course.name }}
+								<button type="button" class="btn btn-sm btn-warning float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}">
+									{% if course.status == 'P' %}
+										Consultar Evolución
+									{% endif %}
+								</button>
+							</li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<div class="alert alert-warning" role="alert">
+						No hay cursos en progreso en los que se haya inscripto
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+<div class="accordion-item">
+	<h2 class="accordion-header" id="headingTwo">
+		<button class="accordion-button collapsed bg-success text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+			CURSOS EN ETAPA DE INSCRIPCION
+		</button>
+	</h2>
+	<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionEvolution">
+		<div class="accordion-body">
+			{% if inscription_courses %}
+				<ul class="list-group">
+					{% for course in inscription_courses %}
+						<li class="list-group-item list-group-item-success">
+							{{ course.name }}
+							<button type="button" class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}">
+								{% if course.status == 'I' %}
+									Consultar Evolución
+								{% endif %}
+							</button>
+						</li>
+					{% endfor %}
+				</ul>
+			{% else %}
+				<div class="alert alert-success" role="alert">
+					No hay cursos para listar en los que se haya inscripto
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="headingThree">
+	<button class="accordion-button collapsed bg-danger text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+		CURSOS FINALIZADOS
+	</button>
+</h2>
+<div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionEvolution">
+	<div class="accordion-body">
+		{% if finalized_courses %}
+			<ul class="list-group">
+				{% for course in finalized_courses %}
+					<li class="list-group-item list-group-item-danger">
+						{{ course.name }}
+						<button type="button" class="btn btn-sm btn-danger float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}">
+							{% if course.status == 'F' %}
+								Consultar Evolución
+							{% endif %}
+						</button>
+					</li>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<div class="alert alert-danger" role="alert">
+				No hay cursos finalizados para listar en los que se haya inscripto
+			</div>
+		{% endif %}
+	</div>
+</div>
+</div>
+</div>
 
-    <ul class="list-group">
-        {% for course in enrolled_courses %}
-            {% with enrollment_count=course.registration_set.count %}
-                <li class="list-group-item">
-                    {{ course.name }}
-                    <a href="" class="btn btn-sm btn-warning float-end">
-                        Consultar Evolución
-                    </a>
-                </li>
-            {% endwith %}
-        {% endfor %}
-    </ul>
+<!-- Modal -->
+<div class="modal fade" id="modalEvolution" tabindex="-1" aria-labelledby="modalEvolutionLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalEvolutionLabel">Consultar Evolución</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="modal-body"></div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+			</div>
+		</div>
+	</div>
+</div>
 
-{% else %}
-    <div class="alert alert-primary" role="alert">
-        Ud. no está inscripto en ningún curso
-    </div>
-{% endif %}
+<script>
+	async function showEvolutionModal(button) {
+		try {
+			var courseId = button.getAttribute('data-course-id');
+			var response = await fetch(`/evolution/${courseId}`);
+			var data = await response.json();
+
+			var cardContent = `
+				<h5 class="card-title">
+					<strong>${data.courseName}</strong>
+					<span class="float-end badge bg-${data.registration_status.enabled ? 'success' : 'danger'}">
+						${data.registration_status.enabled ? 'REGULAR' : 'IRREGULAR'}
+					</span>
+				</h5>
+				<h6>Profesor: ${data.teacher}</h6>
+				<h6 class="text-center">
+					<span class="badge bg-${data.courseStatus === 'P' ? 'warning text-dark' : data.courseStatus === 'I' ? 'success' : data.courseStatus === 'F' ? 'danger' : ''}">
+						${data.courseStatus === 'P' ? 'CURSO EN PROGRESO' : data.courseStatus === 'I' ? 'EN ETAPA DE INSCRIPCION' : data.courseStatus === 'F' ? 'CURSO FINALIZADO' : ''}
+					</span>
+				</h6>
+				</h6>
+				<hr>
+				<h6 class="card-subtitle my-2 text-muted">Notas:</h6>
+				<table class="table table-success table-striped">
+					<thead>
+						<tr>
+							<th scope="col"></th>
+							<th class="text-center" scope="col">Nota</th>
+						</tr>
+					</thead>
+					<tbody>
+					${data.marks.map(mark => `
+						<tr>
+							<th scope="row">Evaluación 1</th>
+							<td class="text-center">${mark.mark_1}</td>
+						</tr>
+						<tr>
+							<th scope="row">Evaluación 2</th>
+							<td class="text-center">${mark.mark_2}</td>
+						</tr>
+						<tr>
+							<th scope="row">Evaluación 3</th>
+							<td class="text-center">${mark.mark_3}</td>
+						</tr>
+						<tr class="table-dark">
+							<th scope="row">Promedio</th>
+							<td class="text-center">${mark.average}</td>
+						</tr>
+					`).join('')}
+					</tbody>
+				</table>
+				<h6 class="card-subtitle my-2 text-muted">Asistencias:</h6>
+				<table class="table table-success table-striped">
+					<thead>
+						<tr>
+							<th scope="col">Fecha</th>
+							<th class="text-center" scope="col">Asistencia</th>
+						</tr>
+					</thead>
+					<tbody>
+						${data.attendances.map(attendance => `
+							<tr>
+								<th scope="row">${attendance.date}</th>
+								<td class="text-center text-${attendance.present ? 'success' : 'danger'}" style="font-weight:bold;">
+									${attendance.present ? 'P' : 'A'}
+								</td>
+							</tr>
+						`).join('')}
+						<tr class="table-dark">
+							<th scope="row" colspan="2">
+								Total de Clases: ${data.classQuantity}
+								- Asistencias: ${data.attendances.filter(attendance => attendance.present).length}
+								- Ausencias: ${data.attendances.filter(attendance => !attendance.present).length}
+							</th>
+						</tr>
+					</tbody>
+				</table>
+			`;
+			var modalBody = document.getElementById('modal-body');
+			modalBody.innerHTML = cardContent;
+			var modal = new bootstrap.Modal(document.getElementById('modalEvolution'));
+			modal.show();
+			document.querySelector('.modal-backdrop').remove();
+		} catch(error) {
+			console.error('Error:', error);
+		}
+	}
+</script>
+

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, ErrorView
+from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, AttendanceListView, AddAttendanceView, evolution, ErrorView
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -24,14 +24,19 @@ urlpatterns = [
     path('courses/<int:pk>/delete/', login_required(CourseDeleteView.as_view()), name='course_delete'),
 
     # INSCRIPCION DE UN ALUMNO EN UN CURSO
-    path('enroll_course/<int:course_id>', CourseEnrollmentView.as_view(), name='enroll_course'),
+    path('enroll_course/<int:course_id>', login_required(CourseEnrollmentView.as_view()), name='enroll_course'),
     path('error/', login_required(ErrorView.as_view()), name='error'),
 
     # PAGINA DE VISTA DE INSCRIPCION
-    path('courses/<int:course_id>', StudentListMarkView.as_view(), name='student_list_mark'),
-    path('courses/update_mark/<int:mark_id>', UpdateMarkView.as_view(), name='update_mark'),
 
     # PAGINAS ADMINISTRACION DE NOTAS: (LISTA DE ESTUDIANTES POR CURSO - EDICION DE NOTAS)
+    path('courses/<int:course_id>', login_required(StudentListMarkView.as_view()), name='student_list_mark'),
+    path('courses/update_mark/<int:mark_id>', login_required(UpdateMarkView.as_view()), name='update_mark'),
 
     # PAGINAS DE ASISTENCIAS: (LISTA DE ESTUDIANTES POR CURSO - AGREGAR ASISTENCIAS)
+    path('course/<int:course_id>/list_attendance/', login_required(AttendanceListView.as_view()), name='list_attendance'),
+    path('course/<int:course_id>/add_attendance/', login_required(AddAttendanceView.as_view()), name='add_attendance'),
+
+    # EVOLUCION DEL ESTUDIANTE
+    path('evolution/<int:course_id>/', login_required(evolution), name='evolution'),
 ]

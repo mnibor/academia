@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import Course, Registration, Attendance, Mark
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'teacher', 'class_quantity')
-    list_filter = ('teacher',)
+    list_display = ('name', 'teacher', 'class_quantity', 'status')
+    list_filter = ('teacher', 'status')
 admin.site.register(Course, CourseAdmin)
 
 class RegistrationAdmin(admin.ModelAdmin):

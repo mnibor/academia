@@ -1,10 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+
+	<div class="container mt-3">
+		<h2>Administración de Asistencias</h2>
+		<h4>
+			Listado de Alumnos - <strong>{{ course.name }}</strong>
+			{% if course.status == 'I' %}
+				<span class="badge bg-success float-end">EN ETAPA DE INSCRIPCION</span>
+			{% elif course.status == 'P' %}
+				<span class="badge bg-warning text-dark float-end">EN PROGRESO</span>
+			{% elif course.status == 'F' %}
+				<span class="badge bg-danger float-end">FINALIZADO</span>
+			{% endif %}
+		</h4>
+		<hr>
+		<div class="row">
+			<div class="col">
+				<h5>Cantidad de Clases: {{ course.class_quantity }}</h5>
+			</div>
+			<div class="col">
+				<h5>Clases restantes: {{ remaining_classes }}</h5>
+			</div>
+		</div>
+		<hr>
+		<div class="table-responsive">
+			<table class="table table-striped">
+				<thead>
+				<tr>
+					<th>Estudiante</th>
+					{% for attendance in attendance_data %}
+						<th class="text-center">{{ attendance.date }}</th>
+					{% endfor %}
+				</tr>
+				</thead>
+				<tbody>
+				{% for student in students %}
+					<tr>
+						{% if not student.enabled %}
+							<td class="text-danger">{{ student.student__first_name }} {{ student.student__last_name }}
+								<span class="badge text-bg-danger">IRREGULAR</span></td>
+						{% else %}
+							<td>{{ student.student__first_name }} {{ student.student__last_name }}</td>
+						{% endif %}
+						{% for item in attendance_data %}
+							{% for attendance in item.attendance_data %}
+								{% if student.student__id == attendance.student.student__id %}
+									{% if attendance.attendance_status == True %}
+										<td class="text-center text-success">
+											<strong>P</strong>
+										</td>
+									{% else %}
+										<td class="text-center text-danger">
+											<strong>A</strong>
+										</td>
+									{% endif %}
+								{% endif %}
+							{% endfor %}
+						{% endfor %}
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<a class="btn btn-primary float-end {% if course.status == 'I' or course.status == 'F' or remaining_classes == 0 %}disabled{% endif %}"href="{% url 'add_attendance' course.id %}">Agregar Asistencias</a>
+	</div>
+{% endblock %}
+
