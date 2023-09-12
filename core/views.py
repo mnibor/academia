@@ -160,6 +160,33 @@ class ProfileView(TemplateView):
             context['progress_courses'] = progress_courses
             context['finalized_courses'] = finalized_courses
 
+        elif user.groups.first().name == 'administrativos':
+            # Obtengo todos los usuarios
+            all_users = User.objects.all()
+            # Obtengo todos los grupos
+            all_groups = Group.objects.all()
+            # Obtengo los datos de perfil de cada usuario
+            user_profiles = []
+            for user in all_users:
+                profile = user.profile
+                user_groups = user.groups.all()
+                processed_groups = [plural_to_singular(group.name) for group in user_groups]
+                user_profiles.append({
+                    'user': user,
+                    'groups': processed_groups,
+                    'profile': profile
+                })
+            context['user_profiles'] = user_profiles
+            context['all_groups'] = all_groups
+            # Obtener todos los cursos existentes
+            all_courses = Course.objects.all()
+            inscription_courses = all_courses.filter(status='I')
+            progress_courses = all_courses.filter(status='P')
+            finalized_courses = all_courses.filter(status='F')
+            context['inscription_courses'] = inscription_courses
+            context['progress_courses'] = progress_courses
+            context['finalized_courses'] = finalized_courses
+
         return context
 
     def post(self, request, *args, **kwargs):
