@@ -139,19 +139,19 @@
 					${data.marks.map(mark => `
 						<tr>
 							<th scope="row">Evaluación 1</th>
-							<td class="text-center">${mark.mark_1}</td>
+							<td class="text-center">${mark.mark_1 === null ? '-' : mark.mark_1}</td>
 						</tr>
 						<tr>
 							<th scope="row">Evaluación 2</th>
-							<td class="text-center">${mark.mark_2}</td>
+							<td class="text-center">${mark.mark_2 === null ? '-' : mark.mark_2}</td>
 						</tr>
 						<tr>
 							<th scope="row">Evaluación 3</th>
-							<td class="text-center">${mark.mark_3}</td>
+							<td class="text-center">${mark.mark_3 === null ? '-' : mark.mark_3}</td>
 						</tr>
 						<tr class="table-dark">
 							<th scope="row">Promedio</th>
-							<td class="text-center">${mark.average}</td>
+							<td class="text-center">${mark.average === null ? '-' : mark.average}</td>
 						</tr>
 					`).join('')}
 					</tbody>
