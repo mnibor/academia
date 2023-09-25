@@ -163,9 +163,11 @@ class ProfileView(TemplateView):
         elif user.groups.first().name == 'administrativos':
             # Obtengo todos los usuarios
             all_users = User.objects.all()
+
             # Obtengo todos los grupos
             all_groups = Group.objects.all()
-            # Obtengo los datos de perfil de cada usuario
+
+            # Obtengo cada perfil de usuario
             user_profiles = []
             for user in all_users:
                 profile = user.profile
@@ -176,8 +178,9 @@ class ProfileView(TemplateView):
                     'groups': processed_groups,
                     'profile': profile
                 })
+
             context['user_profiles'] = user_profiles
-            context['all_groups'] = all_groups
+
             # Obtener todos los cursos existentes
             all_courses = Course.objects.all()
             inscription_courses = all_courses.filter(status='I')
