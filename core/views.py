@@ -19,6 +19,9 @@ import os
 from django.conf import settings
 from datetime import date
 from django.http import JsonResponse
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 # FUNCION PARA CONVERTIR EL PLURAL DE UN GRUPO A SU SINGULAR
 def plural_to_singular(plural):
@@ -547,3 +550,30 @@ def evolution(request, course_id):
     }
 
     return JsonResponse(evolution_data, safe=False)
+
+# CAMBIAR LA CONTRASEÑA DEL USUARIO
+@add_group_name_to_context
+class ProfilePasswordChangeView(PasswordChangeView):
+    template_name = 'profile/change_password.html'
+    success_url = reverse_lazy('profile')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['password_changed'] = self.request.session.get('password_changed', False)
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Cambio de contraseña exitoso')
+        update_session_auth_hash(self.request, form.user)
+        self.request.session['password_changed'] = True
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            'Hubo un error al momento de intentar cambiar la contraseña: {}.'.format(
+                form.errors.as_text()
+            )
+        )
+        return super().form_invalid(form)
+

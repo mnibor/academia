@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, AttendanceListView, AddAttendanceView, evolution, ErrorView
+from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, AttendanceListView, AddAttendanceView, evolution, ErrorView, ProfilePasswordChangeView
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -39,4 +39,7 @@ urlpatterns = [
 
     # EVOLUCION DEL ESTUDIANTE
     path('evolution/<int:course_id>/', login_required(evolution), name='evolution'),
+
+    # CAMBIO DE CONTRASEÑA
+    path('password_change/', login_required(ProfilePasswordChangeView.as_view()), name='profile_password_change'),
 ]

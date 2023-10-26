@@ -22,6 +22,9 @@
                             <a class="btn btn-warning w-100 mb-1" href="{% url 'admin:index' %}">Ir al Admin</a>
                         {% endif %}
 
+                        <a class="btn btn-secondary w-100 mb-1" href="{% url 'profile_password_change' %}">Cambiar Contraseña</a>
+                        <hr>
+
                         <button type="button" class="btn btn-outline-secondary w-100 mb-1" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                             Editar Perfil
                         </button>
@@ -30,6 +33,14 @@
                 </div>
             </div>
             <div class="col-md-8">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
                 <!-- evaluar grupo al que pertenece el usuario -->
                 {% if group_name == 'estudiantes' %}
                     {% include 'profile/students.html' %}
