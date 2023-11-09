@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, AttendanceListView, AddAttendanceView, evolution, ErrorView, ProfilePasswordChangeView
+from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, AttendanceListView, AddAttendanceView, evolution, ErrorView, ProfilePasswordChangeView, AddUserView, CustomLoginView
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -42,4 +42,10 @@ urlpatterns = [
 
     # CAMBIO DE CONTRASEÑA
     path('password_change/', login_required(ProfilePasswordChangeView.as_view()), name='profile_password_change'),
+
+    # AGREGAR NUEVO USUARIO
+    path('add_user/', AddUserView.as_view(), name='add_user'),
+
+    # NUEVO LOGIN
+    path('login/', CustomLoginView.as_view(), name='custom_login'),
 ]

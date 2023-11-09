@@ -1,27 +1,21 @@
-from typing import Any, Dict, Optional
-from django.db.models.query import QuerySet
-from django.forms.models import BaseModelForm
-from django.http import HttpResponse
-from django.http.response import HttpResponseRedirect
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.models import Group
-from .forms import RegisterForm, UserForm, ProfileForm, CourseForm
+from .forms import RegisterForm, UserForm, ProfileForm, CourseForm, UserCreationForm
 from django.views import View
-from django.utils.decorators import method_decorator
 from .models import Course, Registration, Mark, Attendance
 from django.contrib.auth.models import User
+from accounts.models import Profile
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.contrib.auth.mixins import UserPassesTestMixin
-import os
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.conf import settings
-from datetime import date
 from django.http import JsonResponse
 from django.contrib.auth.views import PasswordChangeView
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.views import LoginView
 
 # FUNCION PARA CONVERTIR EL PLURAL DE UN GRUPO A SU SINGULAR
 def plural_to_singular(plural):
@@ -34,7 +28,6 @@ def plural_to_singular(plural):
     }
 
     return plural_singular.get(plural, "error")
-
 
 # DECORADOR PERSONALIZADO
 def add_group_name_to_context(view_class):
@@ -71,18 +64,15 @@ def add_group_name_to_context(view_class):
     view_class.dispatch = dispatch
     return view_class
 
-
 # PAGINA DE INICIO
 @add_group_name_to_context
 class HomeView(TemplateView):
     template_name = 'home.html'
 
-
 # PAGINA DE PRECIOS
 @add_group_name_to_context
 class PricingView(TemplateView):
     template_name = 'pricing.html'
-
 
 # PAGINA DE PREGUNTAS Y RESPUESTAS / PAGINA DE ACERCA DE (A CARGO DE LOS SEGUIDORES DEL CANAL)
 
@@ -101,12 +91,16 @@ class RegisterView(View):
             user = authenticate(username=user_creation_form.cleaned_data['username'],
                                 password=user_creation_form.cleaned_data['password1'])
             login(request, user)
+
+            # Actualizar el campo created_by_admin del modelo Profile
+            user.profile.created_by_admin = False
+            user.profile.save()
+
             return redirect('home')
         data = {
             'form': user_creation_form
         }
         return render(request, 'registration/register.html', data)
-
 
 # PAGINA DE PERFIL
 @add_group_name_to_context
@@ -128,8 +122,6 @@ class ProfileView(TemplateView):
             context['inscription_courses'] = inscription_courses
             context['progress_courses'] = progress_courses
             context['finalized_courses'] = finalized_courses
-
-
         elif user.groups.first().name == 'estudiantes':
             # Obtener todos los cursos donde esta inscripto el estudiante
             registrations = Registration.objects.filter(student=user)
@@ -192,7 +184,6 @@ class ProfileView(TemplateView):
             context['inscription_courses'] = inscription_courses
             context['progress_courses'] = progress_courses
             context['finalized_courses'] = finalized_courses
-
         return context
 
     def post(self, request, *args, **kwargs):
@@ -291,7 +282,6 @@ class CourseEditView(UserPassesTestMixin, UpdateView):
         messages.error(self.request, 'Ha ocurrido un error al actualizar el registro')
         return self.render_to_response(self.get_context_data(form=form))
 
-
 # ELIMINACION DE UN REGISTRO
 @add_group_name_to_context
 class CourseDeleteView(UserPassesTestMixin, DeleteView):
@@ -308,7 +298,6 @@ class CourseDeleteView(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'El registro se ha eliminado correctamente')
         return super().form_valid(form)
-
 
 # REGISTRO DE UN USUARIO EN UN CURSO
 @add_group_name_to_context
@@ -328,7 +317,6 @@ class CourseEnrollmentView(TemplateView):
             messages.error(request, 'No se pudo completar la inscripción')
 
         return redirect('courses')
-
 
 # MOSTRAR LISTA DE ALUMNOS Y NOTAS A LOS PROFESORES
 @add_group_name_to_context
@@ -352,7 +340,6 @@ class StudentListMarkView(TemplateView):
                 'mark_3': mark.mark_3,
                 'average': mark.average,
             })
-
         context['course'] = course
         context['student_data'] = student_data
         return context
@@ -563,6 +550,11 @@ class ProfilePasswordChangeView(PasswordChangeView):
         return context
 
     def form_valid(self, form):
+        # Actualizar el campo created_by_admin del modelo Profile
+        profile = Profile.objects.get(user=self.request.user)
+        profile.created_by_admin = False
+        profile.save()
+
         messages.success(self.request, 'Cambio de contraseña exitoso')
         update_session_auth_hash(self.request, form.user)
         self.request.session['password_changed'] = True
@@ -577,3 +569,67 @@ class ProfilePasswordChangeView(PasswordChangeView):
         )
         return super().form_invalid(form)
 
+# AGREGAR UN NUEVO USUARIO
+@add_group_name_to_context
+class AddUserView(UserPassesTestMixin, LoginRequiredMixin, CreateView):
+    model = User
+    form_class = UserCreationForm
+    template_name = 'add_user.html'
+    success_url = '/profile/'
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('error')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        groups = Group.objects.all()
+        singular_groups = [plural_to_singular(group.name).capitalize() for group in groups]
+        context['groups'] = zip(groups, singular_groups)
+        return context
+
+    def form_valid(self, form):
+        # Obtener el grupo que seleccionó
+        group_id = self.request.POST['group']
+        group = Group.objects.get(id=group_id)
+
+        # Crear usuario sin guardarlo aún
+        user = form.save(commit=False)
+
+        # Colocamos una contraseña por defecto -Aca podría ir la lógica para crear una contraseña aleatoria-
+        user.set_password('contraseña')
+
+        # Convertir a un usuario al staff
+        if group_id != '1':
+            user.is_staff = True
+
+        # Creamos el usuario
+        user.save()
+
+        # Agregamos el usuario al grupo seleccionado
+        user.groups.clear()
+        user.groups.add(group)
+
+        return super().form_valid(form)
+
+# LOGIN PERSONALIZADO
+@add_group_name_to_context
+class CustomLoginView(LoginView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        # Acceder al perfil del usuario
+        profile = self.request.user.profile
+
+        # Verificamos el valor del campo created_by_admin
+        if profile.created_by_admin:
+            messages.info(self.request, 'BIENVENIDO, Cambie su contraseña ahora !!!')
+            response['Location'] = reverse_lazy('profile_password_change')
+            response.status_code = 302
+
+        return response
+
+    def get_success_url(self):
+        return super().get_success_url()

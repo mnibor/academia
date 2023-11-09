@@ -50,7 +50,7 @@
                         | {{ user.username }}</a>
                 </li>
             {% else %}
-                <a class="btn btn-outline-light me-2" href="{% url 'login' %}">Iniciar Sesión</a>
+                <a class="btn btn-outline-light me-2" href="{% url 'custom_login' %}">Iniciar Sesión</a>
                 <a class="btn btn-warning" href="{% url 'register' %}">Registrarse</a>
             {% endif %}
         </div>

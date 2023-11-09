@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <h2>Crear Nuevo Usuario</h2>
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-6 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form action="{% url 'add_user' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nombre de usuario</label>
+                            <input type="text" name="username" id="username" class="form-control">
+                        </div>
+
+                        <div class="mb-3 row">
+                            <div class="col">
+                                <label for="first_name" class="form-label">Nombre</label>
+                                <input type="text" name="first_name" id="first_name" class="form-control">
+                            </div>
+                            <div class="col">
+                                <label for="last_name" class="form-label">Apellido</label>
+                                <input type="text" name="last_name" id="last_name" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mb-3 row">
+                            <div class="col">
+                                <label for="email" class="form-label">Correo electrónico</label>
+                                <input type="email" name="email" id="email" class="form-control">
+                            </div>
+                            <div class="col">
+                                <label for="group" class="form-label">Grupo</label>
+                                <select name="group" id="group" class="form-control">
+                                    <option disabled selected>Seleccione un grupo</option>
+                                    {% for group, singular_group in groups %}
+                                    <option value="{{ group.id }}">{{ singular_group }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
