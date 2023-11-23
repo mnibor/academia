@@ -1,7 +1,7 @@
 import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
-from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.models import Group
 from .forms import RegisterForm, UserForm, ProfileForm, CourseForm, UserCreationForm
 from django.views import View
@@ -29,28 +29,35 @@ def plural_to_singular(plural):
 
     return plural_singular.get(plural, "error")
 
+# OBTENER COLOR Y GRUPO DE UN USUARIO
+def get_group_and_color(user):
+    group = user.groups.first()
+    group_name = None
+    group_name_singular = None
+    color = None
+
+    if group:
+        if group.name == 'estudiantes':
+            color = 'bg-primary'
+        elif group.name == 'profesores':
+            color = 'bg-success'
+        elif group.name == 'preceptores':
+            color = 'bg-secondary'
+        elif group.name == 'administrativos':
+            color = 'bg-danger'
+
+        group_name = group.name
+        group_name_singular = plural_to_singular(group.name)
+
+    return group_name, group_name_singular, color
+
 # DECORADOR PERSONALIZADO
 def add_group_name_to_context(view_class):
     original_dispatch = view_class.dispatch
 
     def dispatch(self, request, *args, **kwargs):
         user = self.request.user
-        group = user.groups.first()
-        group_name = None
-        group_name_singular = None
-        color = None
-        if group:
-            if group.name == 'estudiantes':
-                color = 'bg-primary'
-            elif group.name == 'profesores':
-                color = 'bg-success'
-            elif group.name == 'preceptores':
-                color = 'bg-secondary'
-            elif group.name == 'administrativos':
-                color = 'bg-danger'
-
-            group_name = group.name
-            group_name_singular = plural_to_singular(group.name)
+        group_name, group_name_singular, color = get_group_and_color(user)
 
         context = {
             'group_name': group_name,
@@ -156,8 +163,9 @@ class ProfileView(TemplateView):
             context['finalized_courses'] = finalized_courses
 
         elif user.groups.first().name == 'administrativos':
-            # Obtengo todos los usuarios
-            all_users = User.objects.all()
+            # Obtengo todos los usuarios que no pertenecen al grupo administrativos
+            admin_group = Group.objects.get(name='administrativos')
+            all_users = User.objects.exclude(groups__in=[admin_group])
 
             # Obtengo todos los grupos
             all_groups = Group.objects.all()
@@ -589,3 +597,21 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         return super().get_success_url()
+
+# VISUALIZACION DEL PERFIL DE UN USUARIO
+@add_group_name_to_context
+class UserDetailsView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = 'user_details.html'
+    context_object_name = 'user_profile'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.get_object()
+        group_name, group_name_singular, color = get_group_and_color(user)
+        context['group_name_user'] = group_name
+        context['group_name_singular_user'] = group_name_singular
+        context['color_user'] = color
+
+
+        return context
