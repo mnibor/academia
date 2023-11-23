@@ -129,8 +129,10 @@ class ProfileView(TemplateView):
             context['inscription_courses'] = inscription_courses
             context['progress_courses'] = progress_courses
             context['finalized_courses'] = finalized_courses
+
         elif user.groups.first().name == 'estudiantes':
             # Obtener todos los cursos donde esta inscripto el estudiante
+            student_id = user.id
             registrations = Registration.objects.filter(student=user)
             enrolled_courses = []
             inscription_courses = []
@@ -148,6 +150,7 @@ class ProfileView(TemplateView):
                 elif course.status == 'F':
                     finalized_courses.append(course)
 
+            context['student_id'] = student_id
             context['inscription_courses'] = inscription_courses
             context['progress_courses'] = progress_courses
             context['finalized_courses'] = finalized_courses
@@ -458,12 +461,12 @@ class AddAttendanceView(TemplateView):
 
         return redirect('list_attendance', course_id=course_id)
 
-# CONSULTAR EVOLUCION DEL ESTUDIANTE
-def evolution(request, course_id):
+# CONSULTAR LA EVOLUCION DE UN ESTUDIANTE DADO
+def evolution(request, course_id, student_id):
     course = get_object_or_404(Course, id=course_id)
     teacher = course.teacher.get_full_name()
     class_quantity = course.class_quantity
-    student = request.user
+    student = student_id
     registration_status = Registration.objects.filter(course=course, student=student).values('enabled').first()
     attendances = Attendance.objects.filter(course=course, student=student)
     marks = Mark.objects.filter(course=course, student=student)
@@ -604,7 +607,6 @@ class UserDetailsView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'user_details.html'
     context_object_name = 'user_profile'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
@@ -613,5 +615,48 @@ class UserDetailsView(LoginRequiredMixin, DetailView):
         context['group_name_singular_user'] = group_name_singular
         context['color_user'] = color
 
+        if user.groups.first().name == 'profesores':
+            # Obtener todos los cursos asignados al profesor
+            assigned_courses = Course.objects.filter(teacher=user).order_by('-id')
+            inscription_courses = assigned_courses.filter(status='I')
+            progress_courses = assigned_courses.filter(status='P')
+            finalized_courses = assigned_courses.filter(status='F')
+            context['inscription_courses'] = inscription_courses
+            context['progress_courses'] = progress_courses
+            context['finalized_courses'] = finalized_courses
 
+        elif user.groups.first().name == 'estudiantes':
+            # Obtener todos los cursos donde esta inscripto el estudiante
+            student_id = user.id
+            registrations = Registration.objects.filter(student=user)
+            enrolled_courses = []
+            inscription_courses = []
+            progress_courses = []
+            finalized_courses = []
+
+            for registration in registrations:
+                course = registration.course
+                enrolled_courses.append(course)
+
+                if course.status == 'I':
+                    inscription_courses.append(course)
+                elif course.status == 'P':
+                    progress_courses.append(course)
+                elif course.status == 'F':
+                    finalized_courses.append(course)
+
+            context['student_id'] = student_id
+            context['inscription_courses'] = inscription_courses
+            context['progress_courses'] = progress_courses
+            context['finalized_courses'] = finalized_courses
+
+        elif user.groups.first().name == 'preceptores':
+            # Obtener todos los cursos existentes
+            all_courses = Course.objects.all()
+            inscription_courses = all_courses.filter(status='I')
+            progress_courses = all_courses.filter(status='P')
+            finalized_courses = all_courses.filter(status='F')
+            context['inscription_courses'] = inscription_courses
+            context['progress_courses'] = progress_courses
+            context['finalized_courses'] = finalized_courses
         return context

@@ -13,7 +13,7 @@
 						{% for course in progress_courses %}
 							<li class="list-group-item list-group-item-warning">
 								{{ course.name }}
-								<button type="button" class="btn btn-sm btn-warning float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}">
+								<button type="button" class="btn btn-sm btn-warning float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}" data-student-id="{{ student_id }}">
 									{% if course.status == 'P' %}
 										Consultar Evolución
 									{% endif %}
@@ -42,7 +42,7 @@
 					{% for course in inscription_courses %}
 						<li class="list-group-item list-group-item-success">
 							{{ course.name }}
-							<button type="button" class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}">
+							<button type="button" class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}" data-student-id="{{ student_id }}">
 								{% if course.status == 'I' %}
 									Consultar Evolución
 								{% endif %}
@@ -71,7 +71,7 @@
 				{% for course in finalized_courses %}
 					<li class="list-group-item list-group-item-danger">
 						{{ course.name }}
-						<button type="button" class="btn btn-sm btn-danger float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}">
+						<button type="button" class="btn btn-sm btn-danger float-end" data-bs-toggle="modal" data-bs-target="#modalEvolution" onclick="showEvolutionModal(this)" data-course-id="{{ course.id }}" data-student-id="{{ student_id }}">
 							{% if course.status == 'F' %}
 								Consultar Evolución
 							{% endif %}
@@ -109,7 +109,8 @@
 	async function showEvolutionModal(button) {
 		try {
 			var courseId = button.getAttribute('data-course-id');
-			var response = await fetch(`/evolution/${courseId}`);
+			var studentId = button.getAttribute('data-student-id');
+			var response = await fetch(`/evolution/${courseId}/${studentId}`);
 			var data = await response.json();
 
 			var cardContent = `
