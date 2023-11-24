@@ -393,7 +393,7 @@ class AttendanceListView(ListView):
         course = Course.objects.get(id=self.kwargs['course_id'])
         students = Registration.objects.filter(course=course).values('student__id', 'student__first_name', 'student__last_name', 'enabled')
 
-        all_dates = Attendance.objects.filter(course=course, date__isnull=False).values_list('date', flat=True).distinct()
+        all_dates = Attendance.objects.filter(course=course, date__isnull=False).values_list('date', flat=True).distinct().order_by('date')
         # [('2023-08-22'), ('2023-08-29')]
         # ('2023-08-22', '2023-08-29') => flat=True
         remaining_classes = course.class_quantity - all_dates.count()
@@ -443,12 +443,16 @@ class AddAttendanceView(TemplateView):
         return context
 
     def post(self, request, course_id):
+        date = request.POST.get('date')
         course = Course.objects.get(id=course_id)
         registrations = Registration.objects.filter(course=course)
 
-        if request.method == 'POST':
-            date = request.POST.get('date')
-
+        if Attendance.objects.filter(course=course, date=date).exists():
+            # Aquí puedes manejar el caso cuando la fecha ya existe, por ejemplo, puedes mostrar un mensaje de error
+            messages.error(request, 'La fecha ya existe para este curso.')
+            return redirect('add_attendance', course_id=course_id)
+        else:
+            # Aquí puedes continuar con tu lógica si la fecha no existe en la base de datos
             for registration in registrations:
                 present = request.POST.get('attendance_' + str(registration.student.id))
                 attendance = Attendance.objects.filter(student=registration.student, course=course, date=None).first()

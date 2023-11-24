@@ -64,6 +64,7 @@
 			</table>
 		</div>
 		<a class="btn btn-primary float-end {% if course.status == 'I' or course.status == 'F' or remaining_classes == 0 %}disabled{% endif %}"href="{% url 'add_attendance' course.id %}">Agregar Asistencias</a>
+		<a class="btn btn-secondary" href="{% url 'profile' %}">Volver Atrás</a>
 	</div>
 {% endblock %}
 

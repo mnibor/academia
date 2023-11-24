@@ -20,13 +20,23 @@
         <div class="row">
             <div class="col-6 mx-auto">
                 <div class="card">
+                    <!-- sección de mensajes -->
+                    {% if messages %}
+                        <div class="container mt-3">
+                            {% for message in messages %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     <div class="card-header">
                         Registrar Asistencias
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label" for="date">Fecha:</label>
-                            <input class="form-control" type="date" name="date" id="date">
+                            <input class="form-control" type="date" name="date" id="date" required>
                         </div>
                         <hr>
                         {% for registration in registrations %}
@@ -39,6 +49,7 @@
                         {% endfor %}
                     </div>
                     <div class="card-footer text-body-secondary">
+                        <a class="btn btn-sm btn-secondary" href="{% url 'list_attendance' course.id %}">Volver Atrás</a>
                         <button class="btn btn-sm btn-primary float-end" type="submit">Guardar cambios</button>
                     </div>
                 </div>
