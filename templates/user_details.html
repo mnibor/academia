@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container my-3 mb-5">
+    <h2>CONSULTA DE DATOS</h2>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <!-- CARD DATOS DE PERFIL -->
+            <div class="card border rounded-2 shadow p-3 mb-3">
+                <div class="card-body">
+                    <img class="img-thumbnail rounded-circle mb-3" src="{{ user_profile.profile.image.url }}" alt="{{ user_profile.username }}" style="width: 100px;">
+                    <h2>{{ user_profile.first_name }} {{ user_profile.last_name }}</h2>
+                    <h4><span class="badge {{ color_user }}">{{ group_name_singular_user | capfirst }}</span></h4>
+                    <hr>
+                    <p><strong>Nombre de usuario: </strong>{{ user_profile.username}}</p>
+                    <p><strong>Domicilio: </strong>{{ user_profile.profile.address }} </p>
+                    <p><strong>Localidad: </strong>{{ user_profile.profile.location }} </p>
+                    <p><strong>Teléfono:  </strong>{{ user_profile.profile.telephone }}</p>
+                    <p><strong>Correo electrónico:  </strong>{{ user_profile.email }}</p>
+                    <hr>
+                    <button type="button" class="btn btn-outline-secondary w-100 mb-1" data-bs-toggle="modal" data-bs-target="#editProfileModal" data-student-id="{{ user_profile.id }}">
+                        Editar Perfil
+                    </button>
+                    <a class="btn btn-primary w-100" href="{% url 'profile' %}">Volver Atrás</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card border rounded-2 shadow p-3 mb-3">
+                <div class="card-body">
+                    <!-- evaluar grupo al que pertenece el usuario -->
+                    {% if group_name_user == 'estudiantes' %}
+                        {% include 'profile/students.html' %}
+                    {% elif group_name_user == 'profesores' %}
+                        {% include 'profile/profesor.html' %}
+                    {% elif group_name_user == 'preceptores' %}
+                        {% include 'profile/preceptor.html' %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
