@@ -44,4 +44,80 @@
     </div>
 </div>
 
+<!-- Vertically centered modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Editar Perfil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'superuser_edit' user_profile.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="d-flex">
+                        <img class="mx-auto img-thumbnail rounded-circle mb-3" src="{{ user_profile.profile.image.url }}" alt="{{ user_profile.username }}" style="width: 100px;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="image">Imagen de perfil</label>
+                        <input class="form-control" type="file" name="image" id="image">
+                    </div>
+
+                    <div class="d-flex">
+                        <div class="mb-3 mr-2">
+                            <label for="first_name">Nombre</label>
+                            <input type="text" class="form-control" name="first_name" value="{{ user_profile.first_name }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="last_name">Apellido</label>
+                            <input type="text" class="form-control" name="last_name" value="{{ user_profile.last_name }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address">Dirección</label>
+                        <input type="text" class="form-control" name="address" value="{{ user_profile.profile.address }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location">Localidad</label>
+                        <input type="text" class="form-control" name="location" value="{{ user_profile.profile.location }}">
+                    </div>
+
+                    <div class="d-flex">
+                        <div class="mb-3 mr-2">
+                            <label for="telephone">Teléfono</label>
+                            <input type="text" class="form-control" name="telephone" value="{{ user_profile.profile.telephone }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email">Email</label>
+                            <input type="text" class="form-control" name="email" value="{{ user_profile.email }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="group">Grupo</label>
+                        <select class="form-control" name="group" id="group">
+                            {% for group_name, group_id in singular_groups %}
+                            <option value="{{ group_id }}" {% if group_id == group_id_user %}selected{% endif %}>{{ group_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

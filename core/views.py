@@ -32,6 +32,7 @@ def plural_to_singular(plural):
 # OBTENER COLOR Y GRUPO DE UN USUARIO
 def get_group_and_color(user):
     group = user.groups.first()
+    group_id = None
     group_name = None
     group_name_singular = None
     color = None
@@ -46,10 +47,11 @@ def get_group_and_color(user):
         elif group.name == 'administrativos':
             color = 'bg-danger'
 
+        group_id = group.id
         group_name = group.name
         group_name_singular = plural_to_singular(group.name)
 
-    return group_name, group_name_singular, color
+    return group_id, group_name, group_name_singular, color
 
 # DECORADOR PERSONALIZADO
 def add_group_name_to_context(view_class):
@@ -57,7 +59,7 @@ def add_group_name_to_context(view_class):
 
     def dispatch(self, request, *args, **kwargs):
         user = self.request.user
-        group_name, group_name_singular, color = get_group_and_color(user)
+        group_id, group_name, group_name_singular, color = get_group_and_color(user)
 
         context = {
             'group_name': group_name,
@@ -394,8 +396,6 @@ class AttendanceListView(ListView):
         students = Registration.objects.filter(course=course).values('student__id', 'student__first_name', 'student__last_name', 'enabled')
 
         all_dates = Attendance.objects.filter(course=course, date__isnull=False).values_list('date', flat=True).distinct().order_by('date')
-        # [('2023-08-22'), ('2023-08-29')]
-        # ('2023-08-22', '2023-08-29') => flat=True
         remaining_classes = course.class_quantity - all_dates.count()
 
         attendance_data = []
@@ -614,10 +614,18 @@ class UserDetailsView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
-        group_name, group_name_singular, color = get_group_and_color(user)
+        group_id, group_name, group_name_singular, color = get_group_and_color(user)
+
+        # Obtengo todos los grupos
+        groups = Group.objects.all()
+        singular_names = [plural_to_singular(group.name).capitalize() for group in groups]
+        groups_ids = [group.id for group in groups]
+        singular_groups = zip(singular_names, groups_ids)
+        context['group_id_user'] = group_id
         context['group_name_user'] = group_name
         context['group_name_singular_user'] = group_name_singular
         context['color_user'] = color
+        context['singular_groups'] = singular_groups
 
         if user.groups.first().name == 'profesores':
             # Obtener todos los cursos asignados al profesor
@@ -664,3 +672,30 @@ class UserDetailsView(LoginRequiredMixin, DetailView):
             context['progress_courses'] = progress_courses
             context['finalized_courses'] = finalized_courses
         return context
+
+# GRABACION DE LOS DATOS DE UN USUARIO
+def superuser_edit(request, user_id):
+    if not request.user.is_superuser:
+        return redirect('error')
+
+    user = User.objects.get(pk=user_id)
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=user.profile)
+        group = request.POST.get('group')
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            user.groups.clear()
+            user.groups.add(group)
+            return redirect('user_details', pk=user.id)
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=user.profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form
+    }
+    return render(request, 'profile/user_details.html', context)

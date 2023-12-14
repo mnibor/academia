@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, AttendanceListView, AddAttendanceView, evolution, ErrorView, ProfilePasswordChangeView, AddUserView, CustomLoginView, UserDetailsView
+from .views import HomeView, PricingView, RegisterView, ProfileView, CoursesView, CourseCreateView, CourseEditView, CourseDeleteView, CourseEnrollmentView, StudentListMarkView, UpdateMarkView, AttendanceListView, AddAttendanceView, evolution, ErrorView, ProfilePasswordChangeView, AddUserView, CustomLoginView, UserDetailsView, superuser_edit
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -51,4 +51,7 @@ urlpatterns = [
 
     # VISUALIZAR EL PERFIL DE UN USUARIO
     path('user_details/<int:pk>/', UserDetailsView.as_view(), name='user_details'),
+
+    # EDITAR DATOS DEL USUARIO
+    path('superuser_edit/<int:user_id>/', login_required(superuser_edit), name='superuser_edit'),
 ]
