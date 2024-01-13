@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="icon" type="image/png" href="">
+
+        <title>Evolución de {{student_data.username}}</title>
+
+        <style>
+            .text-green {
+                color: green;
+            }
+
+            .text-red {
+                color: red;
+            }
+        </style>
+
+
+    </head>
+    <body>
+        <div class="container mt-3">
+            <h1>Evolución de {{ student_data.first_name }} {{ student_data.last_name }}</h1>
+            <h2>Curso: {{ courseName }}</h2>
+            <h4>Profesor: {{ teacher }}</h4>
+            <hr>
+            <h3>Estado del Curso:
+                {% if courseStatus == 'P' %}
+                    <span class="text-warning">CURSO EN PROGRESO</span>
+                {% elif courseStatus == 'I' %}
+                    <span class="text-success">EN ETAPA DE INSCRIPCION</span>
+                {% else %}
+                    <span class="text-danger">CURSO FINALIZADO</span>
+                {% endif %}
+            </h3>
+
+            <h2>Condición del Estudiante:
+                {% if registration_status.enabled == True %}
+                    <span>Alumno Regular</span>
+                {% else %}
+                    <span>Alumno Irregular</span>
+                {% endif %}
+            </h2>
+            <br><br>
+            <h3>EVALUACIONES</h3>
+            <p>Evaluaciones realizadas por el docente a lo largo del curso</p>
+
+            <table class="table table-success table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Nota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mark in marks %}
+                        <tr>
+                            <th scope="row">Evaluación 1</th>
+                            <td>{{ mark.mark_1|default:'-' }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Evaluación 2</th>
+                            <td>{{ mark.mark_2|default:'-' }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Evaluación 3</th>
+                            <td>{{ mark.mark_3|default:'-' }}</td>
+                        </tr>
+                        <tr class="table-dark">
+                            <th scope="row">Promedio</th>
+                            <td>{{ mark.average|default:'-' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br><br>
+
+            <h3>ASISTENCIAS</h3>
+            <p>Asistencias del alumno a lo largo del curso.</p>
+
+            <table class="table table-success table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Asistencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance in attendances %}
+                        <tr>
+                            <th scope="row">{{ attendance.date }}</th>
+                            <td scope="row">
+                                {% if attendance.present %}
+                                    <span class="text-green"><strong>P</strong></span>
+                                {% else %}
+                                    <span class="text-red"><strong>A</strong></span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tr class="table-dark">
+                    <th scope="row" colspan="2">
+                        Total de Clases: {{ classQuantity }}
+                        - Asistencias: {{ present_attendance_count }}
+                        - Ausencias: {{ absent_attendance_count }}
+                    </th>
+                </tr>
+            </table>
+            <br>
+
+        </div>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

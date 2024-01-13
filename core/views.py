@@ -17,6 +17,10 @@ from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import LoginView
 
+from django.template.loader import get_template
+from django.http import HttpResponse
+from weasyprint import HTML
+
 # FUNCION PARA CONVERTIR EL PLURAL DE UN GRUPO A SU SINGULAR
 def plural_to_singular(plural):
     # Diccionario de palabras
@@ -470,10 +474,24 @@ def evolution(request, course_id, student_id):
     course = get_object_or_404(Course, id=course_id)
     teacher = course.teacher.get_full_name()
     class_quantity = course.class_quantity
-    student = student_id
-    registration_status = Registration.objects.filter(course=course, student=student).values('enabled').first()
-    attendances = Attendance.objects.filter(course=course, student=student)
-    marks = Mark.objects.filter(course=course, student=student)
+
+    student = get_object_or_404(User, pk=student_id)
+
+    student_data = {
+        'id': student.id,
+        'username': student.username,
+        'email': student.email,
+        'first_name': student.first_name,
+        'last_name':student.last_name,
+    }
+
+    registration_status = Registration.objects.filter(course=course, student=student_id).values('enabled').first()
+
+    attendances = Attendance.objects.filter(course=course, student=student_id)
+    present_attendance_count = attendances.filter(present=True).count()
+    absent_attendance_count = attendances.filter(present=False).count()
+
+    marks = Mark.objects.filter(course=course, student=student_id)
 
     attendances_data = []
     marks_data = []
@@ -498,16 +516,37 @@ def evolution(request, course_id, student_id):
     ]
 
     evolution_data = {
+        'student_data': student_data,
         'registration_status': registration_status,
         'teacher': teacher,
         'classQuantity': class_quantity,
         'courseStatus': course.status,
         'courseName': course.name,
         'attendances': attendances_data,
+        'present_attendance_count': present_attendance_count,
+        'absent_attendance_count': absent_attendance_count,
         'marks': marks_data
     }
 
-    return JsonResponse(evolution_data, safe=False)
+    if request.GET.get('generate_pdf') == 'true':
+        # Genero el PDF
+        template = get_template('profile/evolution_pdf.html')
+        html = template.render(evolution_data)
+
+        response = HttpResponse(content_type='application/pdf')
+
+        filename = f"{course.name.replace(' ', '-')}_{student.username}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        html = HTML(string=html)
+        result = html.write_pdf(encoding='utf-8')
+        response.write(result)
+        return response
+
+        # return render(request, 'profile/evolution_pdf.html', evolution_data)
+    else:
+        # Genero el Modal
+        return JsonResponse(evolution_data, safe=False)
 
 # CAMBIAR LA CONTRASEÑA DEL USUARIO
 @add_group_name_to_context
